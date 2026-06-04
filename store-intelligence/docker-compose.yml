@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_PATH=/app/data/store_intelligence.db
+      - EVENTS_PATH=/app/data/sample_events.jsonl
+      - POS_PATH=/app/data/POS_sample_transactions.csv
+    volumes:
+      - ./data:/app/data
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  dashboard:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      - DB_PATH=/app/data/store_intelligence.db
+      - API_URL=http://api:8000
+    volumes:
+      - ./data:/app/data
+    command: streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0
+    depends_on:
+      - api
